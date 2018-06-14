@@ -6,6 +6,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,8 @@ import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
+
+import static android.content.ContentValues.TAG;
 
 public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.MyHolder>{
 
@@ -27,9 +30,11 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.MyHolder>{
  void swap(List<TodoTask> todos)
  {
      mTodoList=todos;
+     notifyDataSetChanged();
  }
 
 ClickEvent mClickevent;
+
     public TodoAdapter(Context mContext,ClickEvent clickEvent) {
         this.mContext = mContext;
         mClickevent=clickEvent;
@@ -49,9 +54,10 @@ ClickEvent mClickevent;
 
     @Override
     public void onBindViewHolder(@NonNull MyHolder myHolder, int i) {
-        if(mTodoList!=null)
-        {
+
+
            TodoTask todoTask = mTodoList.get(i);
+        Log.d(TAG, "Adding values:"+i);
 
             String description = todoTask.getDescription();
             int priority = todoTask.getPriority();
@@ -68,11 +74,10 @@ ClickEvent mClickevent;
             // Get the appropriate background color based on the priority
             int priorityColor = getPriorityColor(priority);
             priorityCircle.setColor(priorityColor);
-           myHolder.mDescription.setText(todoTask.getDescription());
-           myHolder.mPriority.setText(todoTask.getPriority());
+           myHolder.mDescription.setText(description);
            myHolder.mDate.setText(updatedAt);
 
-        }
+
 
     }
     private int getPriorityColor(int priority) {
@@ -95,9 +100,9 @@ ClickEvent mClickevent;
     }
     @Override
     public int getItemCount() {
-        if(mTodoList==null)
+        if(mTodoList==null) {
             return 0;
-        else
+        }
         return mTodoList.size();
     }
 
@@ -120,8 +125,8 @@ ClickEvent mClickevent;
 
         @Override
         public void onClick(View view) {
-            
-        mClickevent.callDetails(getAdapterPosition());
+            int elementId = mTodoList.get(getAdapterPosition()).getId();
+        mClickevent.callDetails(elementId);
         }
     }
 

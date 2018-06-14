@@ -10,16 +10,14 @@
     android:paddingStart="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin">
 
-    <!-- EditText for getttaskEntrytask description input -->
     <EditText
-        android:id="@+id/editTextTaskDescription"
+        android:id="@+id/edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="start"
         android:hint="@string/edit_task_description"
         android:paddingBottom="@dimen/activity_horizontal_margin" />
 
-    <!-- TextView and FrameLayout (which contains buttons) for Priority Selection -->
     <TextView
         style="@style/TextAppearance.AppCompat.Medium"
         android:layout_width="wrap_content"

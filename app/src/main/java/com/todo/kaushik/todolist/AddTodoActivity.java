@@ -4,23 +4,26 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import java.util.Date;
+import java.util.zip.Inflater;
 
 public class AddTodoActivity extends AppCompatActivity {
 
     MyDatabase myDatabase;
     LiveData<TodoTask> liveTodoTask;
-    TextView mDescription;
+    EditText mDescription;
     public static final String INSTANCE_TASK_ID = "instanceTaskId";
     Button mSaveButton;
     public static final int PRIORITY_HIGH = 1;
@@ -32,18 +35,20 @@ public class AddTodoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_todo);
-        mDescription = (TextView)findViewById(R.id.editTextTaskDescription);
+        initViews();
         taskID=-1;
         if (savedInstanceState != null && savedInstanceState.containsKey(INSTANCE_TASK_ID)) {
             taskID = savedInstanceState.getInt(INSTANCE_TASK_ID, -1);
         }
-        if(getIntent()!=null)
+
+        Intent intent = getIntent();
+        if(intent!=null&&intent.hasExtra("position"))
         {
             mSaveButton.setText("Update");
             if(taskID==-1)
                 {
 
-                    myDatabase = MyDatabase.getInstance(this);
+
                     taskID = getIntent().getIntExtra("position",-1);
 
                     AddViewModelFactory addViewModelFactory = new AddViewModelFactory(myDatabase,taskID);
@@ -62,6 +67,17 @@ public class AddTodoActivity extends AppCompatActivity {
 
     }
 
+    private void initViews() {
+        myDatabase = MyDatabase.getInstance(this);
+        mDescription = findViewById(R.id.edit);
+        mSaveButton = findViewById(R.id.saveButton);
+        mSaveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onSaveButtonClicked();
+            }
+        });
+    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -107,13 +123,6 @@ public class AddTodoActivity extends AppCompatActivity {
         mDescription.setText(todoTask.getDescription());
         setPriorityInViews(todoTask.getPriority());
 
-        mSaveButton = (Button)findViewById(R.id.saveButton);
-        mSaveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onSaveButtonClicked();
-            }
-        });
     }
     public void onSaveButtonClicked() {
         String description = mDescription.getText().toString();
