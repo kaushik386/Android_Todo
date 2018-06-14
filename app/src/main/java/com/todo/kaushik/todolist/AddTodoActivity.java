@@ -21,24 +21,32 @@ public class AddTodoActivity extends AppCompatActivity {
     MyDatabase myDatabase;
     LiveData<TodoTask> liveTodoTask;
     TextView mDescription;
+    public static final String INSTANCE_TASK_ID = "instanceTaskId";
     Button mSaveButton;
     public static final int PRIORITY_HIGH = 1;
     public static final int PRIORITY_MEDIUM = 2;
     public static final int PRIORITY_LOW = 3;
+
+    private int taskID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_todo);
         mDescription = (TextView)findViewById(R.id.editTextTaskDescription);
-        int position;
+        taskID=-1;
+        if (savedInstanceState != null && savedInstanceState.containsKey(INSTANCE_TASK_ID)) {
+            taskID = savedInstanceState.getInt(INSTANCE_TASK_ID, -1);
+        }
         if(getIntent()!=null)
         {
-            position = getIntent().getIntExtra("position",-1);
-            if(position!=-1)
+            mSaveButton.setText("Update");
+            if(taskID==-1)
                 {
-                    myDatabase = MyDatabase.getInstance(this);
 
-                    AddViewModelFactory addViewModelFactory = new AddViewModelFactory(myDatabase,position);
+                    myDatabase = MyDatabase.getInstance(this);
+                    taskID = getIntent().getIntExtra("position",-1);
+
+                    AddViewModelFactory addViewModelFactory = new AddViewModelFactory(myDatabase,taskID);
                     liveTodoTask= ViewModelProviders.of(this,addViewModelFactory).get(AddViewModelLayer.class).getTodoTaskLiveData();
                     liveTodoTask.observe(this, new Observer<TodoTask>() {
                         @Override
@@ -52,6 +60,13 @@ public class AddTodoActivity extends AppCompatActivity {
 
         }
 
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(INSTANCE_TASK_ID, taskID);
+        super.onSaveInstanceState(outState);
     }
     public int getPriorityFromViews() {
         int priority = 1;
@@ -104,8 +119,23 @@ public class AddTodoActivity extends AppCompatActivity {
         String description = mDescription.getText().toString();
         int priority = getPriorityFromViews();
         Date date = new Date();
-
         final TodoTask task = new TodoTask(description, priority, date);
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                if (taskID == -1) {
+                    // insert new task
+                    myDatabase.taskDao().insertTodo(task);
+                } else {
+                    //update task
+                    task.setId(taskID);
+                    myDatabase.taskDao().updateTodo(task);
+                }
+                finish();
+            }
+        });
+
+
 
 
     }
