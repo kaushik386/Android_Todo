@@ -52,6 +52,10 @@ ClickEvent mClickevent;
         return new MyHolder(view);
     }
 
+    public List<TodoTask> getmTodoList()
+    {
+        return mTodoList;
+    }
     @Override
     public void onBindViewHolder(@NonNull MyHolder myHolder, int i) {
 

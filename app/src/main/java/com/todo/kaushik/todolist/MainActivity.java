@@ -5,12 +5,14 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 
 import java.util.List;
@@ -41,7 +43,30 @@ MyDatabase database;
         DividerItemDecoration decoration = new DividerItemDecoration(getApplicationContext(), VERTICAL);
         recyclerView.addItemDecoration(decoration);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder1) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int i) {
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        int position = viewHolder.getAdapterPosition();
+                        List<TodoTask> todoTasks = todoAdapter.getmTodoList();
+                        TodoTask task = todoTasks.get(position);
+                        database.taskDao().deleteTodo(task);
+
+                    }
+                });
+
+
+            }
+        }).attachToRecyclerView(recyclerView);
+                FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
