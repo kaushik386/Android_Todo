@@ -2,6 +2,7 @@ package com.todo.kaushik.todolist;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -65,7 +66,9 @@ MyDatabase database;
 
     private void retrieveTasks() {
 
-        LiveData<List<TodoTask>> tasks = database.taskDao().getList();
+
+        MainActivityModelLayer mainActivityModelLayer = ViewModelProviders.of(this).get(MainActivityModelLayer.class);
+        LiveData<List<TodoTask>> tasks = mainActivityModelLayer.gettodos();
         tasks.observe(this, new Observer<List<TodoTask>>() {
             @Override
             public void onChanged(@Nullable List<TodoTask> taskEntries) {

@@ -2,6 +2,8 @@ package com.todo.kaushik.todolist;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +13,8 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+
+import java.util.Date;
 
 public class AddTodoActivity extends AppCompatActivity {
 
@@ -33,7 +37,9 @@ public class AddTodoActivity extends AppCompatActivity {
             if(position!=-1)
                 {
                     myDatabase = MyDatabase.getInstance(this);
-                    liveTodoTask=myDatabase.taskDao().loadTaskById(position);
+
+                    AddViewModelFactory addViewModelFactory = new AddViewModelFactory(myDatabase,position);
+                    liveTodoTask= ViewModelProviders.of(this,addViewModelFactory).get(AddViewModelLayer.class).getTodoTaskLiveData();
                     liveTodoTask.observe(this, new Observer<TodoTask>() {
                         @Override
                         public void onChanged(@Nullable TodoTask todoTask) {
@@ -46,13 +52,6 @@ public class AddTodoActivity extends AppCompatActivity {
 
         }
 
-        mSaveButton = (Button)findViewById(R.id.saveButton);
-        mSaveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
     }
     public int getPriorityFromViews() {
         int priority = 1;
@@ -92,5 +91,22 @@ public class AddTodoActivity extends AppCompatActivity {
     {
         mDescription.setText(todoTask.getDescription());
         setPriorityInViews(todoTask.getPriority());
+
+        mSaveButton = (Button)findViewById(R.id.saveButton);
+        mSaveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onSaveButtonClicked();
+            }
+        });
+    }
+    public void onSaveButtonClicked() {
+        String description = mDescription.getText().toString();
+        int priority = getPriorityFromViews();
+        Date date = new Date();
+
+        final TodoTask task = new TodoTask(description, priority, date);
+
+
     }
 }
